@@ -40,11 +40,60 @@ class Settings(BaseSettings):
     def __init__(self, **values: Any):
         super().__init__(**values)
 
-        # Construir la URI de conexión a la base de datos
+        # Lista de posibles drivers ODBC para SQL Server
+        odbc_drivers = [
+            "ODBC Driver 18 for SQL Server",
+            "ODBC Driver 17 for SQL Server",
+            "SQL Server Native Client 11.0",
+            "SQL Server",
+            "FreeTDS"
+        ]
+
+        # Intentar detectar el driver disponible
+        driver_encontrado = None
+        try:
+            import pyodbc
+            available_drivers = pyodbc.drivers()
+
+            # Buscar el primer driver disponible de nuestra lista preferida
+            for driver in odbc_drivers:
+                if driver in available_drivers:
+                    driver_encontrado = driver
+                    break
+
+            # Si no encontramos ninguno en nuestra lista preferida, usar el primero disponible
+            if not driver_encontrado and available_drivers:
+                driver_encontrado = available_drivers[0]
+
+            if driver_encontrado:
+                print(f"INFO: Usando driver ODBC: '{driver_encontrado}'")
+            else:
+                # Si no hay drivers disponibles, usar uno común como fallback
+                driver_encontrado = "ODBC Driver 17 for SQL Server"
+                print(f"ADVERTENCIA: No se detectó un driver ODBC. Usando '{driver_encontrado}' por defecto")
+
+        except ImportError:
+            # Si pyodbc no está disponible por alguna razón
+            driver_encontrado = "ODBC Driver 17 for SQL Server"
+            print(f"ADVERTENCIA: No se pudo detectar drivers ODBC. Usando '{driver_encontrado}' por defecto")
+
+        # Construir la URI de conexión a la base de datos con parámetros adicionales de seguridad
+        driver_param = driver_encontrado.replace(' ', '+')
+
         if self.DB_TRUSTED_CONNECTION:
-            self.SQLALCHEMY_DATABASE_URI = f"mssql+pyodbc://{self.DB_HOST}/{self.DB_NAME}?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes"
+            self.SQLALCHEMY_DATABASE_URI = (
+                f"mssql+pyodbc://{self.DB_HOST}/{self.DB_NAME}"
+                f"?driver={driver_param}&trusted_connection=yes&TrustServerCertificate=yes"
+            )
         else:
-            self.SQLALCHEMY_DATABASE_URI = f"mssql+pyodbc://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}?driver=ODBC+Driver+17+for+SQL+Server"
+            # Asegurar que se escape correctamente la contraseña para URL
+            import urllib.parse
+            password_escaped = urllib.parse.quote_plus(self.DB_PASSWORD or "")
+
+            self.SQLALCHEMY_DATABASE_URI = (
+                f"mssql+pyodbc://{self.DB_USER}:{password_escaped}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+                f"?driver={driver_param}&TrustServerCertificate=yes"
+            )
 
 
 settings = Settings()
