@@ -227,8 +227,8 @@ Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](L
 
 Si tienes preguntas o sugerencias, no dudes en contactarme:
 
-- Correo electrónico: tu.email@ejemplo.com
-- GitHub: [tu-usuario](https://github.com/piodois)
+- Correo electrónico: piodois1@gmail.com
+- GitHub: [piodois](https://github.com/piodois)
 
 ---
 
