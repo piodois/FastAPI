@@ -102,6 +102,7 @@ app.include_router(auth.router)
 app.include_router(usuarios.router)
 app.include_router(categorias.router)
 app.include_router(productos.router)
+#app.include_router(registrosdeingreso.router)
 
 
 # Página de bienvenida en la ruta principal
