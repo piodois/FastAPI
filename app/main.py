@@ -12,7 +12,7 @@ from .core.config import settings  # Nota el punto antes de core
 from .core.database import engine
 from .models import Base
 from .exceptions import setup_exception_handlers
-from .routers import auth, usuarios, categorias, productos
+from .routers import auth, usuarios, categorias, productos, registros
 
 # Inicialización de la base de datos
 Base.metadata.create_all(bind=engine)
@@ -102,6 +102,7 @@ app.include_router(auth.router)
 app.include_router(usuarios.router)
 app.include_router(categorias.router)
 app.include_router(productos.router)
+app.include_router(registros.router)
 #app.include_router(registrosdeingreso.router)
 
 
